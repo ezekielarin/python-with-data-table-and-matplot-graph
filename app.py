@@ -11,14 +11,23 @@ from tkinter.filedialog import askopenfilename, asksaveasfilename
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 
+from matplotlib.widgets import Cursor
+
 
 drawdown_count = 0;
 
 buildup_count = 0;
 n=0
 
-filedata = []
 
+points = 0
+
+global xpoints 
+global ypoints 
+xpoints = []
+ypoints = []
+
+filedata = []
 
 
 def handleTabChange(event):
@@ -84,8 +93,6 @@ def popwin():
     top.geometry("600x700")
     top.title("Collect Data")
     
-   
-
     
     def update_row(rows):
        
@@ -156,8 +163,47 @@ def popwin():
 
     pass
 
+
+
 def addtab(plot_type):
     import numpy as np
+    
+    
+    
+
+
+    def onclick(event):
+      global points
+      
+      
+      # print([event.xdata, event.ydata])
+      if event.inaxes is not None:
+          ax = event.inaxes
+          # you now have the axes object for that the user clicked on
+          # you can use ax.children() to figure out which img artist is in this
+          # axes and extract the data from it   
+        #  print(ax)
+          xpoints.append(event.xdata)
+          ypoints.append(event.ydata)
+          
+          event.inaxes.plot(event.xdata, event.ydata, 'o')
+         # event.inaxes.axline((xpoints), (ypoints), linewidth=1, color='r')
+          print(xpoints)
+          event.inaxes.plot((xpoints), (ypoints))
+         
+          event.canvas.draw()
+          
+          
+          
+          points = points + 1
+          if points ==2:
+              points = 0
+              xpoints.clear()
+              ypoints.clear()
+              
+          
+         
+
     
     index = len(notebook.tabs())-1
     frame = tk.Frame(notebook)
@@ -170,7 +216,9 @@ def addtab(plot_type):
     notebook.select(index)
     
     data = dataframe
+    
     #print(data)
+    
     
     if(plot_type=="drawdown"):
         
@@ -194,6 +242,7 @@ def addtab(plot_type):
         plot1.grid(True, which="both")
         plot1.semilogx(t,p)
         plot1.scatter(t,p)
+        Cursor(plot1, color='green', linewidth=2)
         
        
         
@@ -202,19 +251,23 @@ def addtab(plot_type):
         plot2.scatter(t, p)
         plot2.grid(True, which="both")
         plot2.title.set_text('Cartesian Plot'); 
+        
          
         plot3 = fig.add_subplot(223)
         plot3.loglog();
         plot3.scatter(t,dp,);
         plot3.grid(True, which="both")
         plot3.title.set_text('MDH Log log'); #
+        Cursor(plot3, color='green', linewidth=2)
         
         canvas = FigureCanvasTkAgg(fig, master = canv);
+        fig.canvas.mpl_connect('button_press_event', onclick)
         canvas.draw()
         
         canvas.get_tk_widget().pack()
         toolbar = NavigationToolbar2Tk(canvas, canv)
         toolbar.update()
+       
         canvas.get_tk_widget().pack()
         
     if(plot_type=="buildup"):
@@ -223,7 +276,7 @@ def addtab(plot_type):
         ct = 1
         rw = 1
         h = 1;
-        np=1
+        np = 1
         
 
         pi = data['pi'].values[0]
@@ -264,13 +317,18 @@ def addtab(plot_type):
        # semi_log.semilogx(t, p); 
         semi_log.scatter(tpdt,p);  
         semi_log.grid(True, which="both")
+        Cursor(semi_log, color='green', linewidth=2)
         
         plot2 = fig.add_subplot(222);
         plot2.loglog(); 
         plot2.scatter(t,dp); 
         plot2.title.set_text('Log-log Plot'); 
         plot2.grid(True, which="both")
+        
+        
+        
         canvas = FigureCanvasTkAgg(fig, master = canv);
+        fig.canvas.mpl_connect('button_press_event', onclick)
         canvas.draw()
         
         canvas.get_tk_widget().pack()
@@ -280,8 +338,7 @@ def addtab(plot_type):
     
    
     
-    
-	
+
 
 def getrow():
     pass
