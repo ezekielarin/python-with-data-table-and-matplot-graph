@@ -98,6 +98,21 @@ def popwin():
     top.title("Collect Data")
 
     def addtab(plot_type):
+        
+        Uo = float(Uo_.get())
+        Bo = float(Bo_.get())
+        ct = float(ct_.get())
+        h = float(h_.get())
+        rw = float(rw_.get())
+        Qo = float(Qo_.get())
+        Qw = float(Qw_.get())
+        n = float(n_.get())
+        tp = float(tp_.get())
+        pwf = float(pwf_.get())
+        phai = float(phai_.get())
+        
+        
+        
      
         def onclick(event):
           global points
@@ -109,6 +124,17 @@ def popwin():
           
           # print([event.xdata, event.ydata])
           if event.inaxes is not None:
+              
+              print("rw: ", rw)
+             # print("pi: ", pi)
+            #  print("m: ", m)
+              print("Uo: ", Uo)
+              print("Bo: ", Bo)
+              print("ct: ", ct)
+              print("Qo: ", Qo)
+              print("Qw: ", Qw)
+              print("n: ", n)
+              
               ax = event.inaxes
               # you now have the axes object for that the user clicked on
               # you can use ax.children() to figure out which img artist is in this
@@ -128,22 +154,29 @@ def popwin():
               if points ==0:
                   x1 = event.xdata
                   y1 = event.ydata
-                  print("y1: ",y1)
+                 # print("y1: ",y1)
               
               if points==1:
                   x2 = event.xdata
                   y2 = event.ydata
-                  print("x2: ",x2)
+                 # print("x2: ",x2)
                   
               points = points + 1
               if points ==2:
 
                   points = 0
                   m = buildup_m(x1, x2, y1, y2)
+                  k = buildup_k(Qo, Bo, Uo, m, h)
+                  s = buildup_s(pi, pi, phai, h, m, Uo, ct, k, rw) #shape factor
+                  
                   xpoints.clear()
                   ypoints.clear()
-                  skin_val.set(m);
                   
+                  
+                  slope_val.set(m);
+                  skin_val.set(k);
+                  wellbore_val.set(k);
+                  shape_val.set(s);
                   
 
         index = len(notebook.tabs())-1
@@ -158,7 +191,8 @@ def popwin():
         
         skin_val = StringVar(); 
         slope_val = StringVar();
-        slope_val = StringVar();
+        shape_val = StringVar();
+        wellbore_val = StringVar();
         
         skin = tk.Label(results, text = 'Skin factor:', font=('calibre',10, 'bold'))
         skin.grid(row=0,column=0)
@@ -169,7 +203,7 @@ def popwin():
         wellbore = tk.Label(results, text = 'Well bore Storage:', font=('calibre',10, 'bold'))
         wellbore.grid(row=1,column=0)
         
-        wellbore = tk.Label(results, textvariable=skin_val,  text = 'Skin factor:', font=('calibre',10, 'bold'))
+        wellbore = tk.Label(results, textvariable=wellbore_val,  text = 'Skin factor:', font=('calibre',10, 'bold'))
         wellbore.grid(row=1,column=1)
         
  
@@ -178,6 +212,12 @@ def popwin():
         
         slope = tk.Label(results, textvariable=slope_val, font=('calibre',10, 'bold'))
         slope.grid(row=2,column=1)
+        
+        shape_factor= tk.Label(results, text = 'Shape factor:', font=('calibre',10, 'bold'))
+        shape_factor.grid(row=3,column=0)
+        
+        shape_factor = tk.Label(results, textvariable=shape_val, font=('calibre',10, 'bold'))
+        shape_factor.grid(row=3,column=1)
         
         skin_val.set(0);
 
@@ -198,19 +238,10 @@ def popwin():
 
         if(plot_type=="drawdown"):
 
-            pi = pi_.get()
-            pihr = pihr_.get()
-            m =  pi_.get()
-            Uo = Uo_.get()
-            Bo = Bo_.get()
-            ct = ct_.get()
-            k = pi_.get()
-            rw = rw_.get()
-            Qo = Qo_.get()
-            Qw = Qw_.get()
-            n = n_.get()
-            
-            print("RW: ", rw)
+          #  pi = pi_.get()
+          #  pihr = pihr_.get()
+          #  m =  pi_.get()
+           
             
             pi = data['pi'].values[0]
             data['log_time'] = np.log(data.time);
@@ -373,30 +404,30 @@ def popwin():
     
     imp = ttk.Button(wrapper2, text='Import file', command  = lambda: import_file())
     #new_button.pack()
-    imp.grid(column=0, row=7, sticky=tk.W, padx=5, pady=0)
+    imp.grid(column=0, row=8, sticky=tk.W, padx=5, pady=0)
     
     imp = ttk.Button(wrapper2, text='Plot Drawdwon', command  = lambda: addtab("drawdown"))
     #new_button.pack()
-    imp.grid(column=1, row=7, sticky=tk.W, padx=5, pady=0)
+    imp.grid(column=1, row=8, sticky=tk.W, padx=5, pady=0)
     
     imp = ttk.Button(wrapper2, text='Plot Buildup', command  = lambda: addtab("buildup"))
     #new_button.pack()
-    imp.grid(column=2, row=7, sticky=tk.W, padx=5, pady=0)
+    imp.grid(column=2, row=8, sticky=tk.W, padx=5, pady=0)
     
     
     
     name_label = tk.Label(wrapper2, text = 'Uo', font=('calibre',10, 'bold'))
-    Uo_ = tk.Entry(wrapper2,textvariable = 'Uo', font=('calibre',10,'normal'))
+    Uo_ = tk.Entry(wrapper2,textvariable = 'Uo_', font=('calibre',10,'normal'))
     name_label.grid(row=0,column=0)
     Uo_.grid(row=1,column=0)
     
     name_label = tk.Label(wrapper2, text = 'Q', font=('calibre',10, 'bold'))
-    Q_ = tk.Entry(wrapper2,textvariable = 'Q', font=('calibre',10,'normal'))
+    Q_ = tk.Entry(wrapper2,textvariable = 'Q_', font=('calibre',10,'normal'))
     name_label.grid(row=0,column=1)
     Q_.grid(row=1,column=1)
     
     name_label = tk.Label(wrapper2, text = 'ct', font=('calibre',10, 'bold'))
-    ct_ = tk.Entry(wrapper2,textvariable = 'ct', font=('calibre',10,'normal'))
+    ct_ = tk.Entry(wrapper2,textvariable = 'ct_', font=('calibre',10,'normal'))
     name_label.grid(row=0,column=2)
     ct_.grid(row=1,column=2)
     
@@ -408,12 +439,12 @@ def popwin():
     Qo_.grid(row=3,column=0)
     
     name_label = tk.Label(wrapper2, text = 'Qw', font=('calibre',10, 'bold'))
-    Qw_ = tk.Entry(wrapper2,textvariable = 'Qw', font=('calibre',10,'normal'))
+    Qw_ = tk.Entry(wrapper2,textvariable = 'Qw_', font=('calibre',10,'normal'))
     name_label.grid(row=2,column=1)
     Qw_.grid(row=3,column=1)
     
     name_label = tk.Label(wrapper2, text = 'Bo', font=('calibre',10, 'bold'))
-    Bo_ = tk.Entry(wrapper2,textvariable = 'Bo', font=('calibre',10,'normal'))
+    Bo_ = tk.Entry(wrapper2,textvariable = 'Bo_', font=('calibre',10,'normal'))
     name_label.grid(row=2,column=2)
     Bo_.grid(row=3,column=2)
     
@@ -423,14 +454,29 @@ def popwin():
     rw_.grid(row=5,column=0)
     
     name_label = tk.Label(wrapper2, text = 'phai', font=('calibre',10, 'bold'))
-    phai = tk.Entry(wrapper2,textvariable = 'phai_', font=('calibre',10,'normal'))
+    phai_ = tk.Entry(wrapper2,textvariable = 'phai_', font=('calibre',10,'normal'))
     name_label.grid(row=4,column=1)
-    phai.grid(row=5,column=1)
+    phai_.grid(row=5,column=1)
     
     name_label = tk.Label(wrapper2, text = 'n', font=('calibre',10, 'bold'))
-    n = tk.Entry(wrapper2,textvariable = 'n_', font=('calibre',10,'normal'))
+    n_ = tk.Entry(wrapper2,textvariable = 'n_', font=('calibre',10,'normal'))
     name_label.grid(row=4,column=2)
-    n.grid(row=5,column=2)
+    n_.grid(row=5,column=2)
+    
+    name_label = tk.Label(wrapper2, text = 'h', font=('calibre',10, 'bold'))
+    h_ = tk.Entry(wrapper2,textvariable = 'h_', font=('calibre',10,'normal'))
+    name_label.grid(row=6,column=0)
+    h_.grid(row=7,column=0)
+    
+    name_label = tk.Label(wrapper2, text = 'TP', font=('calibre',10, 'bold'))
+    tp_ = tk.Entry(wrapper2,textvariable = 'tp_', font=('calibre',10,'normal'))
+    name_label.grid(row=6,column=1)
+    tp_.grid(row=7,column=1)
+    
+    name_label = tk.Label(wrapper2, text = 'Pwf', font=('calibre',10, 'bold'))
+    pwf_ = tk.Entry(wrapper2,textvariable = 'pwf_', font=('calibre',10,'normal'))
+    name_label.grid(row=6,column=2)
+    pwf_.grid(row=7,column=2)
       
     trv = ttk.Treeview(wrapper1, columns=(1,2,3), show="headings", height="8")
     trv.pack()
@@ -484,9 +530,9 @@ def calculate_pressure():
     Pwf = pi - ((162.6*Qo*Bo*Uo)/k*h)(log(k*t/O*U*ct*rwˆ2) - 3.23+0.87*s)
     return Pwf
  
-def drawdown_k(qo, Bo, Uo, m, h):
+def drawdown_k(Qo, Bo, Uo, m, h):
 
-    k = (162.6*qo*Bo*Uo)/m*h
+    k = (162.6*Qo*Bo*Uo)/m*h
     return k
 
 def drawdown_s(pi, pihr, m, U, ct, k, rw, h, phai):
@@ -498,7 +544,7 @@ def drawdown_CA(pihr, m, Pint, ml):
     return ca
 
 def buildup_m(x1, x2, y1, y2):
-    m = (y2-y1)/(x2-x1)
+    m = round((y2-y1)/(x2-x1), 4)
     return m
 
 
