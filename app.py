@@ -91,6 +91,41 @@ notebook.pack(fill="both", expand=True)
 frame = tk.Frame(center)
 notebook.add(frame, text="+")
 
+def wellbore_popup():
+    win = Toplevel(window)
+    win.geometry("600x700")
+    win.title("Wellbore Storage")
+    
+    name_label = tk.Label(win, text = 'Uo', font=('calibre',10, 'bold'))
+    Uo_ = tk.Entry(win,textvariable = 'Uo_', font=('calibre',10,'normal'))
+    name_label.grid(row=0,column=0)
+    Uo_.grid(row=1,column=0)
+    
+    name_label = tk.Label(win, text = 'Q', font=('calibre',10, 'bold'))
+    Q_ = tk.Entry(win,textvariable = 'Q_', font=('calibre',10,'normal'))
+    name_label.grid(row=0,column=1)
+    Q_.grid(row=1,column=1)
+    
+    name_label = tk.Label(win, text = 'ct', font=('calibre',10, 'bold'))
+    ct_ = tk.Entry(win,textvariable = 'ct_', font=('calibre',10,'normal'))
+    name_label.grid(row=0,column=2)
+    ct_.grid(row=1,column=2)
+    
+    
+    
+    name_label = tk.Label(win, text = 'Qo', font=('calibre',10, 'bold'))
+    Qo_ = tk.Entry(win,textvariable = 'Qo', font=('calibre',10,'normal'))
+    name_label.grid(row=2,column=0)
+    Qo_.grid(row=3,column=0)
+    
+    name_label = tk.Label(win, text = 'Qw', font=('calibre',10, 'bold'))
+    Qw_ = tk.Entry(win,textvariable = 'Qw_', font=('calibre',10,'normal'))
+    name_label.grid(row=2,column=1)
+    Qw_.grid(row=3,column=1)
+    
+    
+
+
 
 def popwin():
     top = Toplevel(window)
@@ -105,6 +140,7 @@ def popwin():
         h = float(h_.get())
         rw = float(rw_.get())
         Qo = float(Qo_.get())
+        Q = float(Q_.get())
         Qw = float(Qw_.get())
         n = float(n_.get())
         tp = float(tp_.get())
@@ -127,7 +163,7 @@ def popwin():
               
               print("rw: ", rw)
              # print("pi: ", pi)
-            #  print("m: ", m)
+            # print("m: ", m)
               print("Uo: ", Uo)
               print("Bo: ", Bo)
               print("ct: ", ct)
@@ -168,6 +204,7 @@ def popwin():
                   m = buildup_m(x1, x2, y1, y2)
                   k = buildup_k(Qo, Bo, Uo, m, h)
                   s = buildup_s(pi, pi, phai, h, m, Uo, ct, k, rw) #shape factor
+                  C = wellbore_c(Q, B, t, dp)
                   
                   xpoints.clear()
                   ypoints.clear()
@@ -175,7 +212,7 @@ def popwin():
                   
                   slope_val.set(m);
                   skin_val.set(k);
-                  wellbore_val.set(k);
+                  wellbore_val.set(k); 
                   shape_val.set(s);
                   
 
@@ -218,6 +255,11 @@ def popwin():
         
         shape_factor = tk.Label(results, textvariable=shape_val, font=('calibre',10, 'bold'))
         shape_factor.grid(row=3,column=1)
+        
+        
+        imp = ttk.Button(results, text='WellBore Storage', command  = lambda: wellbore_popup())
+        #new_button.pack()
+        imp.grid(column=2, row=8, sticky=tk.W, padx=5, pady=0)
         
         skin_val.set(0);
 
@@ -393,8 +435,8 @@ def popwin():
     t3 = StringVar()
     
     wrapper1 = LabelFrame(top, text="Data Set")
-    wrapper2 = LabelFrame(top, text="Control")
-    wrapper3 = LabelFrame(top, text="Result")
+    wrapper2 = LabelFrame(top, text="Data parameters")
+    wrapper3 = LabelFrame(top, text="Well Perimeter")
     
     wrapper1.pack(fill="both", expand="yes", padx="20",pady="10")
     wrapper2.pack(fill="both", expand="yes", padx="20",pady="10")
@@ -477,6 +519,40 @@ def popwin():
     pwf_ = tk.Entry(wrapper2,textvariable = 'pwf_', font=('calibre',10,'normal'))
     name_label.grid(row=6,column=2)
     pwf_.grid(row=7,column=2)
+    
+    
+    #///oil well parameters
+    
+    aa = tk.Label(wrapper3, text = 'Aa', font=('calibre',10, 'bold'))
+    Aa_ = tk.Entry(wrapper3,textvariable = 'Aa_', font=('calibre',10,'normal'))
+    aa.grid(row=0,column=0)
+    Aa_.grid(row=1,column=0)
+    
+    odt = tk.Label(wrapper3, text = 'ODt', font=('calibre',10, 'bold'))
+    ODt_ = tk.Entry(wrapper3,textvariable = 'ODt_', font=('calibre',10,'normal'))
+    odt.grid(row=0,column=1)
+    ODt_.grid(row=1,column=1)
+    
+    odt = tk.Label(wrapper3, text = 'IDc', font=('calibre',10, 'bold'))
+    IDc_ = tk.Entry(wrapper3,textvariable = 'IDc_', font=('calibre',10,'normal'))
+    odt.grid(row=0,column=2)
+    IDc_.grid(row=1,column=2)
+    
+    Vwb = tk.Label(wrapper3, text = 'Vwb', font=('calibre',10, 'bold'))
+    Vwb_ = tk.Entry(wrapper3,textvariable = 'Vwb_', font=('calibre',10,'normal'))
+    Vwb.grid(row=2,column=0)
+    Vwb_.grid(row=3,column=0)
+    
+    Cwb = tk.Label(wrapper3, text = 'Cwb', font=('calibre',10, 'bold'))
+    Cwb_ = tk.Entry(wrapper3,textvariable = 'Cwb_', font=('calibre',10,'normal'))
+    Cwb.grid(row=2,column=1)
+    Cwb_.grid(row=3,column=1)
+    
+    odt = tk.Label(wrapper3, text = 'IDc', font=('calibre',10, 'bold'))
+    IDc_ = tk.Entry(wrapper3,textvariable = 'IDc_', font=('calibre',10,'normal'))
+    odt.grid(row=2,column=2)
+    IDc_.grid(row=3,column=2)
+    
       
     trv = ttk.Treeview(wrapper1, columns=(1,2,3), show="headings", height="8")
     trv.pack()
@@ -485,6 +561,8 @@ def popwin():
     trv.heading(2, text="pressure")
     trv.heading(3, text="DP")
     trv.bind('Double 1', getrow)
+    
+    
     
     pass
 
@@ -515,55 +593,58 @@ def select_file(graph):
    
     print(drawdown_count)
 
-def calculate_pressure():
 
-    k = 2  #permeability
-    t = 2  #time, hour
-    s = 3  #skin factor
-    
-    Qo = 1
-    Uo = 1
-    ct = 1
-    rw = 1
-    h = 1;
-    pi = 2
-    Pwf = pi - ((162.6*Qo*Bo*Uo)/k*h)(log(k*t/O*U*ct*rwˆ2) - 3.23+0.87*s)
-    return Pwf
  
 def drawdown_k(Qo, Bo, Uo, m, h):
 
     k = (162.6*Qo*Bo*Uo)/m*h
-    return k
+    return round(k,4)
 
 def drawdown_s(pi, pihr, m, U, ct, k, rw, h, phai):
     s = 1.151*((pi-pihr)/m*h - np.log(k/(phai*U*ct*rw)) + 3.23)
-    return s
+    return round(s,4)
 
 def drawdown_CA(pihr, m, Pint, ml):
     ca = 5.456*(m/ml * np.exp(-Pint/m))
-    return ca
+    return round(ca,4)
 
 def buildup_m(x1, x2, y1, y2):
     m = round((y2-y1)/(x2-x1), 4)
-    return m
+    return round(m,4)
 
 
 ## Build Up
 def buildup_k(qo, Bo, Uo, m, h):
     k = (162.6*qo*Bo*Uo)/m*h
-    return k
+    return round(k,4)
 
 def buildup_tp(Np, Qo):
     tp = (24*Np)/Qo
-    return tp
+    return round(tp,4)
 
 def buildup_s(pi, pihr,phai, h, m, U, ct, k, rw):
     s = 1.151*((pi-pihr)/m*h - np.log(k/(phai*U*ct * np.square(rw))) + 3.23)
-    return s
+    return round(s,4)
 
 
 def buildup_CA(Pihr, m, ml, Pint):
     ca = 5.456*(m/ml * np.exp(2.303*(Pihr - Pint)/m))
-    return ca
+    return round(ca,4)
+
+def wellbore_c(Q, B, t, dp):
+    c = (Q*B*t)/(24*dp)
+    return round(c,4)
+
+def cfl(IDc, ODt, den):
+    Aa = 3.143*(np.square(IDc) - np.square(ODt)) / 4*(144)
+    c = 144*Aa/5.615* den
+
+    return round(c,4)
+
+def cfe(Vwb, Cwb):
+   
+    c = Vwb * Cwb;
+
+    return round(c,4)
 
 window.mainloop()
