@@ -23,11 +23,14 @@ n=0
 
 
 points = 0
+p1 = 0
 
 global xpoints 
 global ypoints 
 xpoints = []
 ypoints = []
+
+
 
 filedata = []
 
@@ -146,9 +149,6 @@ def popwin():
         tp = float(tp_.get())
         pwf = float(pwf_.get())
         phai = float(phai_.get())
-        
-        
-        
      
         def onclick(event):
           global points
@@ -156,37 +156,54 @@ def popwin():
           global x2 
           global y1 
           global y2
+          global p1
+        
+         
           
           
           # print([event.xdata, event.ydata])
           if event.inaxes is not None:
               
               print("rw: ", rw)
-             # print("pi: ", pi)
-            # print("m: ", m)
+  
               print("Uo: ", Uo)
               print("Bo: ", Bo)
               print("ct: ", ct)
               print("Qo: ", Qo)
               print("Qw: ", Qw)
               print("n: ", n)
+              print(pi);
               
-              ax = event.inaxes
+             # ax = event.inaxes
               # you now have the axes object for that the user clicked on
               # you can use ax.children() to figure out which img artist is in this
               # axes and extract the data from it   
             #  print(ax)
+            
               xpoints.append(event.xdata)
               ypoints.append(event.ydata)
+              pihr = 0
+              
+             
+              if p1 == 0:
+
+                 p1 = p1 + 1
+                 event.inaxes.plot(event.xdata, event.ydata, 'o')
+                 event.inaxes.plot((xpoints), (ypoints))
+                 event.canvas.draw()
+                 
+                 pihr = ypoints
+                 
+                 xpoints.clear()
+                 ypoints.clear()
+                
+                 
+
 
               event.inaxes.plot(event.xdata, event.ydata, 'o')
-             # event.inaxes.axline((xpoints), (ypoints), linewidth=1, color='r')
-             # print(xpoints)
               event.inaxes.plot((xpoints), (ypoints))
-             
               event.canvas.draw()
-              
-              
+
               if points ==0:
                   x1 = event.xdata
                   y1 = event.ydata
@@ -198,20 +215,24 @@ def popwin():
                  # print("x2: ",x2)
                   
               points = points + 1
-              if points ==2:
+              if points == 3:
 
                   points = 0
                   m = buildup_m(x1, x2, y1, y2)
+                 # m = drawdown_m(pwf, pihr, t)
                   k = buildup_k(Qo, Bo, Uo, m, h)
                   s = buildup_s(pi, pi, phai, h, m, Uo, ct, k, rw) #shape factor
-                  C = wellbore_c(Q, B, t, dp)
+                  C = wellbore_c(Q, Bo, t, dp)
+                  print("k", m)
                   
                   xpoints.clear()
                   ypoints.clear()
+                  p1.clear()
+                 
                   
                   
                   slope_val.set(m);
-                  skin_val.set(k);
+                 # skin_val.set(k);
                   wellbore_val.set(k); 
                   shape_val.set(s);
                   
@@ -280,11 +301,6 @@ def popwin():
 
         if(plot_type=="drawdown"):
 
-          #  pi = pi_.get()
-          #  pihr = pihr_.get()
-          #  m =  pi_.get()
-           
-            
             pi = data['pi'].values[0]
             data['log_time'] = np.log(data.time);
             data['dp'] = data.pressure - pi;
@@ -306,8 +322,7 @@ def popwin():
             plot1.semilogx(t,p)
             plot1.scatter(t,p)
             Cursor(plot1, color='green', linewidth=2)
-            
-           
+
             
             plot2 = fig.add_subplot(222);
            # plot2.plot(log_t, p); 
@@ -495,7 +510,7 @@ def popwin():
     name_label.grid(row=4,column=0)
     rw_.grid(row=5,column=0)
     
-    name_label = tk.Label(wrapper2, text = 'phai', font=('calibre',10, 'bold'))
+    name_label = tk.Label(wrapper2, text = 'Porosity', font=('calibre',10, 'bold'))
     phai_ = tk.Entry(wrapper2,textvariable = 'phai_', font=('calibre',10,'normal'))
     name_label.grid(row=4,column=1)
     phai_.grid(row=5,column=1)
@@ -523,35 +538,35 @@ def popwin():
     
     #///oil well parameters
     
-    aa = tk.Label(wrapper3, text = 'Aa', font=('calibre',10, 'bold'))
-    Aa_ = tk.Entry(wrapper3,textvariable = 'Aa_', font=('calibre',10,'normal'))
-    aa.grid(row=0,column=0)
-    Aa_.grid(row=1,column=0)
+   # aa = tk.Label(wrapper3, text = 'Aa', font=('calibre',10, 'bold'))
+    #Aa_ = tk.Entry(wrapper3,textvariable = 'Aa_', font=('calibre',10,'normal'))
+    #aa.grid(row=0,column=0)
+    #Aa_.grid(row=1,column=0)
     
-    odt = tk.Label(wrapper3, text = 'ODt', font=('calibre',10, 'bold'))
-    ODt_ = tk.Entry(wrapper3,textvariable = 'ODt_', font=('calibre',10,'normal'))
-    odt.grid(row=0,column=1)
-    ODt_.grid(row=1,column=1)
+    #odt = tk.Label(wrapper3, text = 'ODt', font=('calibre',10, 'bold'))
+   # ODt_ = tk.Entry(wrapper3,textvariable = 'ODt_', font=('calibre',10,'normal'))
+   # odt.grid(row=0,column=1)
+   # ODt_.grid(row=1,column=1)
     
-    odt = tk.Label(wrapper3, text = 'IDc', font=('calibre',10, 'bold'))
-    IDc_ = tk.Entry(wrapper3,textvariable = 'IDc_', font=('calibre',10,'normal'))
-    odt.grid(row=0,column=2)
-    IDc_.grid(row=1,column=2)
+   # odt = tk.Label(wrapper3, text = 'IDc', font=('calibre',10, 'bold'))
+    #IDc_ = tk.Entry(wrapper3,textvariable = 'IDc_', font=('calibre',10,'normal'))
+   # odt.grid(row=0,column=2)
+    #IDc_.grid(row=1,column=2)
     
-    Vwb = tk.Label(wrapper3, text = 'Vwb', font=('calibre',10, 'bold'))
-    Vwb_ = tk.Entry(wrapper3,textvariable = 'Vwb_', font=('calibre',10,'normal'))
-    Vwb.grid(row=2,column=0)
-    Vwb_.grid(row=3,column=0)
+   # Vwb = tk.Label(wrapper3, text = 'Vwb', font=('calibre',10, 'bold'))
+   # Vwb_ = tk.Entry(wrapper3,textvariable = 'Vwb_', font=('calibre',10,'normal'))
+   # Vwb.grid(row=2,column=0)
+    #Vwb_.grid(row=3,column=0)
     
-    Cwb = tk.Label(wrapper3, text = 'Cwb', font=('calibre',10, 'bold'))
-    Cwb_ = tk.Entry(wrapper3,textvariable = 'Cwb_', font=('calibre',10,'normal'))
-    Cwb.grid(row=2,column=1)
-    Cwb_.grid(row=3,column=1)
+    #Cwb = tk.Label(wrapper3, text = 'Cwb', font=('calibre',10, 'bold'))
+    #Cwb_ = tk.Entry(wrapper3,textvariable = 'Cwb_', font=('calibre',10,'normal'))
+    #Cwb.grid(row=2,column=1)
+    #Cwb_.grid(row=3,column=1)
     
-    odt = tk.Label(wrapper3, text = 'IDc', font=('calibre',10, 'bold'))
-    IDc_ = tk.Entry(wrapper3,textvariable = 'IDc_', font=('calibre',10,'normal'))
-    odt.grid(row=2,column=2)
-    IDc_.grid(row=3,column=2)
+   # odt = tk.Label(wrapper3, text = 'IDc', font=('calibre',10, 'bold'))
+    #IDc_ = tk.Entry(wrapper3,textvariable = 'IDc_', font=('calibre',10,'normal'))
+   # odt.grid(row=2,column=2)
+   # IDc_.grid(row=3,column=2)
     
       
     trv = ttk.Treeview(wrapper1, columns=(1,2,3), show="headings", height="8")
@@ -561,8 +576,6 @@ def popwin():
     trv.heading(2, text="pressure")
     trv.heading(3, text="DP")
     trv.bind('Double 1', getrow)
-    
-    
     
     pass
 
@@ -607,6 +620,11 @@ def drawdown_s(pi, pihr, m, U, ct, k, rw, h, phai):
 def drawdown_CA(pihr, m, Pint, ml):
     ca = 5.456*(m/ml * np.exp(-Pint/m))
     return round(ca,4)
+
+def drawdown_m(pwf, pihr, t):
+    m = (pwf - pihr)/np.log(t)
+    return round(m,4)
+
 
 def buildup_m(x1, x2, y1, y2):
     m = round((y2-y1)/(x2-x1), 4)
