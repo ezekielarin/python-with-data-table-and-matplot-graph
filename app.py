@@ -24,6 +24,7 @@ n=0
 
 points = 0
 p1 = 0
+pihr = 0
 
 global xpoints 
 global ypoints 
@@ -139,6 +140,7 @@ def popwin():
         
         Uo = float(Uo_.get())
         Bo = float(Bo_.get())
+        B = float(b_.get())
         ct = float(ct_.get())
         h = float(h_.get())
         rw = float(rw_.get())
@@ -146,21 +148,22 @@ def popwin():
         Q = float(Q_.get())
         Qw = float(Qw_.get())
         n = float(n_.get())
-        tp = float(tp_.get())
+        #tp = float(tp_.get())
         pwf = float(pwf_.get())
         phai = float(phai_.get())
+        
+       
      
         def onclick(event):
           global points
+          global pihr
           global x1 
           global x2 
           global y1 
           global y2
           global p1
         
-         
-          
-          
+
           # print([event.xdata, event.ydata])
           if event.inaxes is not None:
               
@@ -171,6 +174,7 @@ def popwin():
               print("ct: ", ct)
               print("Qo: ", Qo)
               print("Qw: ", Qw)
+              print("Q: ", Q)
               print("n: ", n)
               print(pi);
               
@@ -182,9 +186,9 @@ def popwin():
             
               xpoints.append(event.xdata)
               ypoints.append(event.ydata)
-              pihr = 0
-              
              
+              
+              
               if p1 == 0:
 
                  p1 = p1 + 1
@@ -192,24 +196,28 @@ def popwin():
                  event.inaxes.plot((xpoints), (ypoints))
                  event.canvas.draw()
                  
-                 pihr = ypoints
+                 pihr = float(event.ydata)
                  
                  xpoints.clear()
                  ypoints.clear()
                 
-                 
-
 
               event.inaxes.plot(event.xdata, event.ydata, 'o')
-              event.inaxes.plot((xpoints), (ypoints))
+              event.inaxes.plot((xpoints), (ypoints)) 
               event.canvas.draw()
 
-              if points ==0:
+              if points == 0:
+                 
+                  
                   x1 = event.xdata
                   y1 = event.ydata
+                  
+                  event.inaxes.annotate('pihr', (x1, y1))
                  # print("y1: ",y1)
               
-              if points==1:
+              if points==1: 
+                 
+                  
                   x2 = event.xdata
                   y2 = event.ydata
                  # print("x2: ",x2)
@@ -218,22 +226,24 @@ def popwin():
               if points == 3:
 
                   points = 0
-                  m = buildup_m(x1, x2, y1, y2)
-                 # m = drawdown_m(pwf, pihr, t)
+                  #m = buildup_m(x1, x2, y1, y2)
+                  m = drawdown_m(pwf, pihr, t.values[0])
                   k = buildup_k(Qo, Bo, Uo, m, h)
-                  s = buildup_s(pi, pi, phai, h, m, Uo, ct, k, rw) #shape factor
-                  C = wellbore_c(Q, Bo, t, dp)
-                  print("k", m)
+                  s = buildup_s(pi, pihr, phai, h, m, Uo, ct, k, rw) #shape factor
+                  C = wellbore_c(Q, B, t.values[0], dp.values[0])
+                  
+                  
+                  print("C", C)
+                  #print("dp", dp)
                   
                   xpoints.clear()
                   ypoints.clear()
-                  p1.clear()
-                 
-                  
+                  p1 = 0
+                                 
                   
                   slope_val.set(m);
-                 # skin_val.set(k);
-                  wellbore_val.set(k); 
+                  skin_val.set(s);
+                  wellbore_val.set(C); 
                   shape_val.set(s);
                   
 
@@ -417,7 +427,6 @@ def popwin():
             trv.insert('','end',values=i)
         pass
     
-    
     def import_file():
         global dataframe
         
@@ -525,10 +534,10 @@ def popwin():
     name_label.grid(row=6,column=0)
     h_.grid(row=7,column=0)
     
-    name_label = tk.Label(wrapper2, text = 'TP', font=('calibre',10, 'bold'))
-    tp_ = tk.Entry(wrapper2,textvariable = 'tp_', font=('calibre',10,'normal'))
+    name_label = tk.Label(wrapper2, text = 'B', font=('calibre',10, 'bold'))
+    b_ = tk.Entry(wrapper2,textvariable = 'b_', font=('calibre',10,'normal'))
     name_label.grid(row=6,column=1)
-    tp_.grid(row=7,column=1)
+    b_.grid(row=7,column=1)
     
     name_label = tk.Label(wrapper2, text = 'Pwf', font=('calibre',10, 'bold'))
     pwf_ = tk.Entry(wrapper2,textvariable = 'pwf_', font=('calibre',10,'normal'))
@@ -606,7 +615,9 @@ def select_file(graph):
    
     print(drawdown_count)
 
-
+def clear_plots():
+    
+    pass
  
 def drawdown_k(Qo, Bo, Uo, m, h):
 
