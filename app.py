@@ -64,7 +64,6 @@ window.title("Well Testt")
 window.geometry("1000x750")
 
 
-
 ############ Frames for tab 1
 top_frame = Frame(window, bg='cyan', width=1080, height=50, pady=3)
 center_l1 = Frame(window, bg='grey', width=1080, height=25, padx=3, pady=3)
@@ -226,14 +225,15 @@ def popwin():
               if points == 3:
 
                   points = 0
-                  #m = buildup_m(x1, x2, y1, y2)
-                  m = drawdown_m(pwf, pihr, t.values[0])
+                  m = buildup_m(x1, x2, y1, y2)
+                  ml = drawdown_m(pwf, pihr, t.values[0])
                   k = buildup_k(Qo, Bo, Uo, m, h)
                   s = buildup_s(pi, pihr, phai, h, m, Uo, ct, k, rw) #shape factor
                   C = wellbore_c(Q, B, t.values[0], dp.values[0])
+                  ca = drawdown_CA(pihr, m, pi, ml)
                   
                   
-                  print("C", C)
+                  print("C", ca)
                   #print("dp", dp)
                   
                   xpoints.clear()
@@ -244,7 +244,7 @@ def popwin():
                   slope_val.set(m);
                   skin_val.set(s);
                   wellbore_val.set(C); 
-                  shape_val.set(s);
+                  shape_val.set(ca);
                   
 
         index = len(notebook.tabs())-1
@@ -638,7 +638,7 @@ def drawdown_m(pwf, pihr, t):
 
 
 def buildup_m(x1, x2, y1, y2):
-    m = round((y2-y1)/(x2-x1), 4)
+    m = (y2-y1)/(x2-x1)
     return round(m,4)
 
 
@@ -649,7 +649,7 @@ def buildup_k(qo, Bo, Uo, m, h):
 
 def buildup_tp(Np, Qo):
     tp = (24*Np)/Qo
-    return round(tp,4)
+    return round(tp, 4)
 
 def buildup_s(pi, pihr,phai, h, m, U, ct, k, rw):
     s = 1.151*((pi-pihr)/m*h - np.log(k/(phai*U*ct * np.square(rw))) + 3.23)
@@ -661,19 +661,17 @@ def buildup_CA(Pihr, m, ml, Pint):
     return round(ca,4)
 
 def wellbore_c(Q, B, t, dp):
-    c = (Q*B*t)/(24*dp)
+    c = (Q*B*t)/(24 * dp)
     return round(c,4)
 
 def cfl(IDc, ODt, den):
     Aa = 3.143*(np.square(IDc) - np.square(ODt)) / 4*(144)
     c = 144*Aa/5.615* den
-
     return round(c,4)
 
 def cfe(Vwb, Cwb):
-   
     c = Vwb * Cwb;
 
-    return round(c,4)
+    return round(c, 4)
 
 window.mainloop()
