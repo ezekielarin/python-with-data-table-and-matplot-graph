@@ -33,6 +33,9 @@ ypoints = []
 
 
 
+
+
+
 filedata = []
 
 
@@ -61,7 +64,12 @@ def handleTabChange(event):
 window = tk.Tk()
 
 window.title("Well Testt")
-window.geometry("1000x750")
+window.geometry("900x700")
+
+skin_factor = StringVar(); 
+drawdown_slope = StringVar();
+shape_factor = StringVar();
+wellbore = StringVar();
 
 
 ############ Frames for tab 1
@@ -94,39 +102,6 @@ notebook.pack(fill="both", expand=True)
 frame = tk.Frame(center)
 notebook.add(frame, text="+")
 
-def wellbore_popup():
-    win = Toplevel(window)
-    win.geometry("600x700")
-    win.title("Wellbore Storage")
-    
-    name_label = tk.Label(win, text = 'Uo', font=('calibre',10, 'bold'))
-    Uo_ = tk.Entry(win,textvariable = 'Uo_', font=('calibre',10,'normal'))
-    name_label.grid(row=0,column=0)
-    Uo_.grid(row=1,column=0)
-    
-    name_label = tk.Label(win, text = 'Q', font=('calibre',10, 'bold'))
-    Q_ = tk.Entry(win,textvariable = 'Q_', font=('calibre',10,'normal'))
-    name_label.grid(row=0,column=1)
-    Q_.grid(row=1,column=1)
-    
-    name_label = tk.Label(win, text = 'ct', font=('calibre',10, 'bold'))
-    ct_ = tk.Entry(win,textvariable = 'ct_', font=('calibre',10,'normal'))
-    name_label.grid(row=0,column=2)
-    ct_.grid(row=1,column=2)
-    
-    
-    
-    name_label = tk.Label(win, text = 'Qo', font=('calibre',10, 'bold'))
-    Qo_ = tk.Entry(win,textvariable = 'Qo', font=('calibre',10,'normal'))
-    name_label.grid(row=2,column=0)
-    Qo_.grid(row=3,column=0)
-    
-    name_label = tk.Label(win, text = 'Qw', font=('calibre',10, 'bold'))
-    Qw_ = tk.Entry(win,textvariable = 'Qw_', font=('calibre',10,'normal'))
-    name_label.grid(row=2,column=1)
-    Qw_.grid(row=3,column=1)
-    
-    
 
 
 
@@ -136,6 +111,13 @@ def popwin():
     top.title("Collect Data")
 
     def addtab(plot_type):
+        
+        global skin_factor
+        global drawdown_slope
+        global welbore
+        global shape_factor
+        global drawdown_intercept
+        global pskin
         
         Uo = float(Uo_.get())
         Bo = float(Bo_.get())
@@ -151,101 +133,12 @@ def popwin():
         pwf = float(pwf_.get())
         phai = float(phai_.get())
         
-       
-     
-        def onclick(event):
-          global points
-          global pihr
-          global x1 
-          global x2 
-          global y1 
-          global y2
-          global p1
+        
+        
+        def onclick(plot_type):
+            pass
         
 
-          # print([event.xdata, event.ydata])
-          if event.inaxes is not None:
-              
-              print("rw: ", rw)
-  
-              print("Uo: ", Uo)
-              print("Bo: ", Bo)
-              print("ct: ", ct)
-              print("Qo: ", Qo)
-              print("Qw: ", Qw)
-              print("Q: ", Q)
-              print("n: ", n)
-              print(pi);
-              
-             # ax = event.inaxes
-              # you now have the axes object for that the user clicked on
-              # you can use ax.children() to figure out which img artist is in this
-              # axes and extract the data from it   
-            #  print(ax)
-            
-              xpoints.append(event.xdata)
-              ypoints.append(event.ydata)
-             
-              
-              
-              if p1 == 0:
-
-                 p1 = p1 + 1
-                 event.inaxes.plot(event.xdata, event.ydata, 'o')
-                 event.inaxes.plot((xpoints), (ypoints))
-                 event.canvas.draw()
-                 
-                 pihr = float(event.ydata)
-                 
-                 xpoints.clear()
-                 ypoints.clear()
-                
-
-              event.inaxes.plot(event.xdata, event.ydata, 'o')
-              event.inaxes.plot((xpoints), (ypoints)) 
-              event.canvas.draw()
-
-              if points == 0:
-                 
-                  
-                  x1 = event.xdata
-                  y1 = event.ydata
-                  
-                  event.inaxes.annotate('pihr', (x1, y1))
-                 # print("y1: ",y1)
-              
-              if points==1: 
-                 
-                  
-                  x2 = event.xdata
-                  y2 = event.ydata
-                 # print("x2: ",x2)
-                  
-              points = points + 1
-              if points == 3:
-
-                  points = 0
-                  m = buildup_m(x1, x2, y1, y2)
-                  ml = drawdown_m(pwf, pihr, t.values[0])
-                  k = buildup_k(Qo, Bo, Uo, m, h)
-                  s = buildup_s(pi, pihr, phai, h, m, Uo, ct, k, rw) #shape factor
-                  C = wellbore_c(Q, B, t.values[0], dp.values[0])
-                  ca = drawdown_CA(pihr, m, pi, ml)
-                  
-                  
-                  print("C", ca)
-                  #print("dp", dp)
-                  
-                  xpoints.clear()
-                  ypoints.clear()
-                  p1 = 0
-                                 
-                  
-                  slope_val.set(m);
-                  skin_val.set(s);
-                  wellbore_val.set(C); 
-                  shape_val.set(ca);
-                  
 
         index = len(notebook.tabs())-1
         frame = tk.Frame(notebook)
@@ -311,19 +204,22 @@ def popwin():
 
         if(plot_type=="drawdown"):
 
-            pi = data['pi'].values[0]
+            pi = data['pressure'].values[0]
             data['log_time'] = np.log(data.time);
-            data['dp'] = data.pressure - pi;
+            data['dp'] = pi - data.pressure ;
+            
+            
            
             
             if 'dt' not in data:
                 data['dt'] = data.time
             
-            fig = Figure(figsize = (10, 6), dpi = 100);
-            t = data.loc[:,"time"]; 
-            log_t = data.loc[:,"log_time"]; 
-            dp = data.loc[:,"dp"];
-            p = data.loc[:,"pressure"]; 
+            fig = Figure(figsize = (10, 6), dpi = 100)
+            t = data.loc[:,"time"]
+            log_t = data.loc[:,"log_time"]
+            dp = data.loc[:,"dp"]
+            p = data.loc[:,"pressure"]
+            # print(dp)
             
 
             plot1 = fig.add_subplot(221); 
@@ -331,11 +227,23 @@ def popwin():
             plot1.grid(True, which="both")
             plot1.semilogx(t,p)
             plot1.scatter(t,p)
-            Cursor(plot1, color='green', linewidth=2)
-
+            
+            slope, intercept =  calculate_slope(t, p)
+            
+            #trendline_data = plot_trendline(plot1, t, slope, intercept)
+           
+            
+            
+            drawdown_slope = slope;
+            skin_factor = slope;
+            welbore = slope; 
+            shape_factor = slope;
+            drawdown_intercept = intercept
+            
+            print("shape:", intercept)
             
             plot2 = fig.add_subplot(222);
-           # plot2.plot(log_t, p); 
+            # plot2.plot(log_t, p); 
             plot2.scatter(t, p)
             plot2.grid(True, which="both")
             plot2.title.set_text('Cartesian Plot'); 
@@ -357,11 +265,12 @@ def popwin():
             toolbar.update()
            
             canvas.get_tk_widget().pack()
+            drawdown_results()
             
         if(plot_type=="buildup"):
               
             
-            pi = data['pi'].values[0]
+            pi = data['pressure'].values[0]
             psi = data['psi'].values[0]
             Ti = data['time'].values[0]
             
@@ -417,6 +326,8 @@ def popwin():
             toolbar = NavigationToolbar2Tk(canvas, canv)
             toolbar.update()
             canvas.get_tk_widget().pack()
+            
+    
         
 
     def update_row(rows):
@@ -589,6 +500,9 @@ def popwin():
     pass
 
 
+
+    
+
 def getrow():
     pass
 
@@ -618,6 +532,61 @@ def select_file(graph):
 def clear_plots():
     
     pass
+
+def drawdown_results():
+    win = Toplevel(window)
+    win.geometry("300x400")
+    win.title("Results")
+    
+    print("shape:", drawdown_slope)
+    
+    
+    skin = tk.Label(win, text = 'Semi log parameters', font=('calibre',10, 'bold'))
+    skin.grid(row=0,column=0)
+    
+    skin = tk.Label(win, text = 'Skin factor:', font=('calibre',10, 'bold'))
+    skin.grid(row=1,column=0)
+    
+    skin = tk.Label(win,  text = skin_factor, font=('calibre',10, 'bold'))
+    skin.grid(row=2,column=1)
+    
+    wellbore = tk.Label(win, text = 'Well bore Storage:', font=('calibre',10, 'bold'))
+    wellbore.grid(row=2,column=0)
+    
+    wellbore = tk.Label(win,  text = welbore, font=('calibre',10, 'bold'))
+    wellbore.grid(row=2,column=1)
+    
+
+    slope = tk.Label(win, text = 'Slope M:', font=('calibre',10, 'bold'))
+    slope.grid(row=3,column=0)
+    
+    slope = tk.Label(win, text=drawdown_slope, font=('calibre',10, 'bold'))
+    slope.grid(row=3,column=1)
+    
+    slope = tk.Label(win, text = 'Intercept:', font=('calibre',10, 'bold'))
+    slope.grid(row=4,column=0)
+    
+    slope = tk.Label(win, text=drawdown_intercept, font=('calibre',10, 'bold'))
+    slope.grid(row=4,column=1)
+    
+    shape_factor= tk.Label(win, text = 'Shape factor:', font=('calibre',10, 'bold'))
+    shape_factor.grid(row=5,column=0)
+
+    
+    #shape_factor = tk.Label(win, textvariable=shape_val, font=('calibre',10, 'bold'))
+    #shape_factor.grid(row=5,column=1)
+    
+def calculate_slope(time_data, pressure_data):
+    #log_time_data = np.log10(time_data)
+    slope, intercept = np.polyfit(time_data, pressure_data, 1)
+    return slope, intercept
+
+
+def plot_trendline(ax, time_data, slope, intercept):
+    log_time_data = time_data#np.log10(time_data)
+    trendline_data = 10 ** (log_time_data * slope + intercept)
+    ax.plot(time_data, trendline_data, '--', label="Trendline")
+    return trendline_data
  
 def drawdown_k(Qo, Bo, Uo, m, h):
 
