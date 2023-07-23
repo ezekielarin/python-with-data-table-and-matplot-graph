@@ -119,18 +119,22 @@ def popwin():
         global drawdown_intercept
         global pskin
         
-        Uo = float(Uo_.get())
+        global cartesian_slope
+        global cartesian_intercept
+        
+        global loglog_slope
+        global loglog_intercept
+        
+        
+        U = float(U_.get())
         Bo = float(Bo_.get())
-        B = float(b_.get())
         ct = float(ct_.get())
         h = float(h_.get())
         rw = float(rw_.get())
         Qo = float(Qo_.get())
-        Q = float(Q_.get())
-        Qw = float(Qw_.get())
+
         n = float(n_.get())
-        #tp = float(tp_.get())
-        pwf = float(pwf_.get())
+
         phai = float(phai_.get())
         
         
@@ -229,18 +233,23 @@ def popwin():
             plot1.scatter(t,p)
             
             slope, intercept =  calculate_slope(t, p)
+            pihr = round(intercept, 4)
+           # slope = (slope, 4)
             
             #trendline_data = plot_trendline(plot1, t, slope, intercept)
            
-            
-            
-            drawdown_slope = slope;
-            skin_factor = slope;
-            welbore = slope; 
-            shape_factor = slope;
+            k = drawdown_k(Qo, Bo, U, slope, h)
+            print("k:", k)
+            drawdown_slope = (slope, 4);
+            skin_factor = drawdown_s(pi, intercept, slope, U, ct, k, rw, h, phai);
+            welbore = (slope, 4); 
+            shape_factor = (slope, 4);
             drawdown_intercept = intercept
+            welbore = wellbore_c(Qo, Bo, dp)
             
-            print("shape:", intercept)
+            
+            
+           
             
             plot2 = fig.add_subplot(222);
             # plot2.plot(log_t, p); 
@@ -248,14 +257,26 @@ def popwin():
             plot2.grid(True, which="both")
             plot2.title.set_text('Cartesian Plot'); 
             
+            slope, intercept =  calculate_slope(t, p)
+            cartesian_slope = slope
+            cartesian_intercept = intercept
+            
+            
              
             plot3 = fig.add_subplot(223)
             plot3.loglog();
             plot3.scatter(t,dp,);
             plot3.grid(True, which="both")
             plot3.title.set_text('MDH Log log'); #
-            Cursor(plot3, color='green', linewidth=2)
             
+            slope, intercept =  calculate_slope(t, dp)
+            loglog_slope = slope
+            loglog_intercept = intercept
+           
+            ca = drawdown_CA(pihr, slope, pi, loglog_slope)
+            
+ 
+    
             canvas = FigureCanvasTkAgg(fig, master = canv);
             fig.canvas.mpl_connect('button_press_event', onclick)
             canvas.draw()
@@ -273,8 +294,6 @@ def popwin():
             pi = data['pressure'].values[0]
             psi = data['psi'].values[0]
             Ti = data['time'].values[0]
-            
-            
             
             data['dp'] = data.pressure - psi;
            
@@ -393,15 +412,17 @@ def popwin():
     
     
     
-    name_label = tk.Label(wrapper2, text = 'Uo', font=('calibre',10, 'bold'))
-    Uo_ = tk.Entry(wrapper2,textvariable = 'Uo_', font=('calibre',10,'normal'))
+    name_label = tk.Label(wrapper2, text = 'µ', font=('calibre',10, 'bold'))
+    U_ = tk.Entry(wrapper2,textvariable = 'U_', font=('calibre',10,'normal'))
     name_label.grid(row=0,column=0)
-    Uo_.grid(row=1,column=0)
+    U_.grid(row=1,column=0)
     
-    name_label = tk.Label(wrapper2, text = 'Q', font=('calibre',10, 'bold'))
-    Q_ = tk.Entry(wrapper2,textvariable = 'Q_', font=('calibre',10,'normal'))
+    name_label = tk.Label(wrapper2, text = 'Bo', font=('calibre',10, 'bold'))
+    Bo_ = tk.Entry(wrapper2,textvariable = 'b_', font=('calibre',10,'normal'))
     name_label.grid(row=0,column=1)
-    Q_.grid(row=1,column=1)
+    Bo_.grid(row=1,column=1)
+    
+   
     
     name_label = tk.Label(wrapper2, text = 'ct', font=('calibre',10, 'bold'))
     ct_ = tk.Entry(wrapper2,textvariable = 'ct_', font=('calibre',10,'normal'))
@@ -415,22 +436,20 @@ def popwin():
     name_label.grid(row=2,column=0)
     Qo_.grid(row=3,column=0)
     
-    name_label = tk.Label(wrapper2, text = 'Qw', font=('calibre',10, 'bold'))
-    Qw_ = tk.Entry(wrapper2,textvariable = 'Qw_', font=('calibre',10,'normal'))
+    
+    name_label = tk.Label(wrapper2, text = 'h', font=('calibre',10, 'bold'))
+    h_ = tk.Entry(wrapper2,textvariable = 'h_', font=('calibre',10,'normal'))
     name_label.grid(row=2,column=1)
-    Qw_.grid(row=3,column=1)
+    h_.grid(row=3,column=1)
+ 
     
-    name_label = tk.Label(wrapper2, text = 'Bo', font=('calibre',10, 'bold'))
-    Bo_ = tk.Entry(wrapper2,textvariable = 'Bo_', font=('calibre',10,'normal'))
-    name_label.grid(row=2,column=2)
-    Bo_.grid(row=3,column=2)
-    
+   
     name_label = tk.Label(wrapper2, text = 'rw', font=('calibre',10, 'bold'))
     rw_ = tk.Entry(wrapper2,textvariable = 'rw_', font=('calibre',10,'normal'))
     name_label.grid(row=4,column=0)
     rw_.grid(row=5,column=0)
     
-    name_label = tk.Label(wrapper2, text = 'Porosity', font=('calibre',10, 'bold'))
+    name_label = tk.Label(wrapper2, text = 'Porosity ɸ', font=('calibre',10, 'bold'))
     phai_ = tk.Entry(wrapper2,textvariable = 'phai_', font=('calibre',10,'normal'))
     name_label.grid(row=4,column=1)
     phai_.grid(row=5,column=1)
@@ -440,21 +459,8 @@ def popwin():
     name_label.grid(row=4,column=2)
     n_.grid(row=5,column=2)
     
-    name_label = tk.Label(wrapper2, text = 'h', font=('calibre',10, 'bold'))
-    h_ = tk.Entry(wrapper2,textvariable = 'h_', font=('calibre',10,'normal'))
-    name_label.grid(row=6,column=0)
-    h_.grid(row=7,column=0)
-    
-    name_label = tk.Label(wrapper2, text = 'B', font=('calibre',10, 'bold'))
-    b_ = tk.Entry(wrapper2,textvariable = 'b_', font=('calibre',10,'normal'))
-    name_label.grid(row=6,column=1)
-    b_.grid(row=7,column=1)
-    
-    name_label = tk.Label(wrapper2, text = 'Pwf', font=('calibre',10, 'bold'))
-    pwf_ = tk.Entry(wrapper2,textvariable = 'pwf_', font=('calibre',10,'normal'))
-    name_label.grid(row=6,column=2)
-    pwf_.grid(row=7,column=2)
-    
+   
+
     
     #///oil well parameters
     
@@ -538,7 +544,7 @@ def drawdown_results():
     win.geometry("300x400")
     win.title("Results")
     
-    print("shape:", drawdown_slope)
+    #print("shape:", drawdown_slope)
     
     
     skin = tk.Label(win, text = 'Semi log parameters', font=('calibre',10, 'bold'))
@@ -548,7 +554,7 @@ def drawdown_results():
     skin.grid(row=1,column=0)
     
     skin = tk.Label(win,  text = skin_factor, font=('calibre',10, 'bold'))
-    skin.grid(row=2,column=1)
+    skin.grid(row=1,column=1)
     
     wellbore = tk.Label(win, text = 'Well bore Storage:', font=('calibre',10, 'bold'))
     wellbore.grid(row=2,column=0)
@@ -571,13 +577,131 @@ def drawdown_results():
     
     shape_factor= tk.Label(win, text = 'Shape factor:', font=('calibre',10, 'bold'))
     shape_factor.grid(row=5,column=0)
+    
+    shape_factor= tk.Label(win, text = shape_factor, font=('calibre',10, 'bold'))
+    shape_factor.grid(row=5,column=1)
+    
+    
+    #Cartesian
+    skin = tk.Label(win, text = 'Catesian Plot', font=('calibre',10, 'bold'))
+    skin.grid(row=6,column=0)
+    
+    
+    skin = tk.Label(win, text = 'Slope', font=('calibre',10, 'bold'))
+    skin.grid(row=7,column=0)
+    
+    skin = tk.Label(win,  text = cartesian_slope, font=('calibre',10, 'bold'))
+    skin.grid(row=7,column=1)
+    
+    wellbore = tk.Label(win, text = 'Intercept:', font=('calibre',10, 'bold'))
+    wellbore.grid(row=8,column=0)
+    
+    wellbore = tk.Label(win,  text = cartesian_intercept, font=('calibre',10, 'bold'))
+    wellbore.grid(row=8,column=1)
+    
+    
+    #Cartesian
+    skin = tk.Label(win, text = 'Log-log Plot', font=('calibre',10, 'bold'))
+    skin.grid(row=9,column=0)
+    
+    
+    skin = tk.Label(win, text = 'Slope', font=('calibre',10, 'bold'))
+    skin.grid(row=10,column=0)
+    
+    skin = tk.Label(win,  text = loglog_slope, font=('calibre',10, 'bold'))
+    skin.grid(row=10,column=1)
+    
+    wellbore = tk.Label(win, text = 'Intercept:', font=('calibre',10, 'bold'))
+    wellbore.grid(row=11,column=0)
+    
+    wellbore = tk.Label(win,  text = loglog_intercept, font=('calibre',10, 'bold'))
+    wellbore.grid(row=11,column=1)
 
     
-    #shape_factor = tk.Label(win, textvariable=shape_val, font=('calibre',10, 'bold'))
-    #shape_factor.grid(row=5,column=1)
+def buildup_results():
+    win = Toplevel(window)
+    win.geometry("300x400")
+    win.title("Results")
     
+    #print("shape:", drawdown_slope)
+    
+    
+    skin = tk.Label(win, text = 'Semi log parameters', font=('calibre',10, 'bold'))
+    skin.grid(row=0,column=0)
+    
+    skin = tk.Label(win, text = 'Skin factor:', font=('calibre',10, 'bold'))
+    skin.grid(row=1,column=0)
+    
+    skin = tk.Label(win,  text = skin_factor, font=('calibre',10, 'bold'))
+    skin.grid(row=1,column=1)
+    
+    wellbore = tk.Label(win, text = 'Well bore Storage:', font=('calibre',10, 'bold'))
+    wellbore.grid(row=2,column=0)
+    
+    wellbore = tk.Label(win,  text = welbore, font=('calibre',10, 'bold'))
+    wellbore.grid(row=2,column=1)
+    
+
+    slope = tk.Label(win, text = 'Slope M:', font=('calibre',10, 'bold'))
+    slope.grid(row=3,column=0)
+    
+    slope = tk.Label(win, text=drawdown_slope, font=('calibre',10, 'bold'))
+    slope.grid(row=3,column=1)
+    
+    slope = tk.Label(win, text = 'Intercept:', font=('calibre',10, 'bold'))
+    slope.grid(row=4,column=0)
+    
+    slope = tk.Label(win, text=drawdown_intercept, font=('calibre',10, 'bold'))
+    slope.grid(row=4,column=1)
+    
+    shape_factor= tk.Label(win, text = 'Shape factor:', font=('calibre',10, 'bold'))
+    shape_factor.grid(row=5,column=0)
+    
+    shape_factor= tk.Label(win, text = shape_factor, font=('calibre',10, 'bold'))
+    shape_factor.grid(row=5,column=1)
+    
+    
+    #Cartesian
+    skin = tk.Label(win, text = 'Catesian Plot', font=('calibre',10, 'bold'))
+    skin.grid(row=6,column=0)
+    
+    
+    skin = tk.Label(win, text = 'Slope', font=('calibre',10, 'bold'))
+    skin.grid(row=7,column=0)
+    
+    skin = tk.Label(win,  text = drawdown_slope, font=('calibre',10, 'bold'))
+    skin.grid(row=7,column=1)
+    
+    wellbore = tk.Label(win, text = 'Intercept:', font=('calibre',10, 'bold'))
+    wellbore.grid(row=8,column=0)
+    
+    wellbore = tk.Label(win,  text = welbore, font=('calibre',10, 'bold'))
+    wellbore.grid(row=8,column=1)
+    
+    
+    #Cartesian
+    skin = tk.Label(win, text = 'Log-log Plot', font=('calibre',10, 'bold'))
+    skin.grid(row=9,column=0)
+    
+    
+    skin = tk.Label(win, text = 'Slope', font=('calibre',10, 'bold'))
+    skin.grid(row=10,column=0)
+    
+    skin = tk.Label(win,  text = drawdown_slope, font=('calibre',10, 'bold'))
+    skin.grid(row=10,column=1)
+    
+    wellbore = tk.Label(win, text = 'Intercept:', font=('calibre',10, 'bold'))
+    wellbore.grid(row=11,column=0)
+    
+    wellbore = tk.Label(win,  text = welbore, font=('calibre',10, 'bold'))
+    wellbore.grid(row=11,column=1)
+    
+    
+   
+    
+
 def calculate_slope(time_data, pressure_data):
-    #log_time_data = np.log10(time_data)
+   # log_time_data = np.log10(time_data)
     slope, intercept = np.polyfit(time_data, pressure_data, 1)
     return slope, intercept
 
@@ -590,15 +714,23 @@ def plot_trendline(ax, time_data, slope, intercept):
  
 def drawdown_k(Qo, Bo, Uo, m, h):
 
-    k = (162.6*Qo*Bo*Uo)/m*h
+    k = (162.6*Qo*Bo*Uo)/abs(m)*h
+    print("k",k)
     return round(k,4)
 
 def drawdown_s(pi, pihr, m, U, ct, k, rw, h, phai):
+   
     s = 1.151*((pi-pihr)/m*h - np.log(k/(phai*U*ct*rw)) + 3.23)
+ 
     return round(s,4)
 
 def drawdown_CA(pihr, m, Pint, ml):
-    ca = 5.456*(m/ml * np.exp(-Pint/m))
+    print("phir",pihr)
+    print("m",m)
+    print("pint",Pint)
+    print("ml",ml)
+    ca = 5.456*(abs(m)/abs(ml) * np.exp(Pint/abs(m)))
+   # print(ca)
     return round(ca,4)
 
 def drawdown_m(pwf, pihr, t):
@@ -613,14 +745,14 @@ def buildup_m(x1, x2, y1, y2):
 
 ## Build Up
 def buildup_k(qo, Bo, Uo, m, h):
-    k = (162.6*qo*Bo*Uo)/m*h
+    k = (162.6*qo*Bo*Uo)/abs(m)*h
     return round(k,4)
 
 def buildup_tp(Np, Qo):
     tp = (24*Np)/Qo
     return round(tp, 4)
 
-def buildup_s(pi, pihr,phai, h, m, U, ct, k, rw):
+def buildup_s(pi, pihr, phai, h, m, U, ct, k, rw):
     s = 1.151*((pi-pihr)/m*h - np.log(k/(phai*U*ct * np.square(rw))) + 3.23)
     return round(s,4)
 
@@ -629,8 +761,8 @@ def buildup_CA(Pihr, m, ml, Pint):
     ca = 5.456*(m/ml * np.exp(2.303*(Pihr - Pint)/m))
     return round(ca,4)
 
-def wellbore_c(Q, B, t, dp):
-    c = (Q*B*t)/(24 * dp)
+def wellbore_c(Qo, Bo, dp):
+    c = (Qo*Bo*107)/(24 * 903)
     return round(c,4)
 
 def cfl(IDc, ODt, den):
